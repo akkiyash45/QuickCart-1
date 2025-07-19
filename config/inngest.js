@@ -1,53 +1,72 @@
-import { inngest } from "@/config/inngest"; // ✅ clean import
+import { Inngest } from "inngest";
+import  mongoose  from 'mongoose';
 import connectDB from "./db";
 import User from "@/models/User";
 
-// 🔁 User Created
-export const syncUserCreation = inngest.createFunction(
-  { id: "sync-user-from-clerk" },
-  { event: "clerk/user.created" },
-  async ({ event }) => {
-    const { id, first_name, last_name, email_address, image_url } = event.data;
+//create a client to send and receive events or messages
+import { Inngest } from 'inngest';
 
+export const inngest = new Inngest({
+  id: "quickcart-app",
+  name: "QuickCart",
+});
+
+
+
+//inngest functions that are used to save data in the database
+ export const syncUserCreation = inngest.createFunction(
+   { 
+    id:'sync-user-from-clerk'
+},
+{
+    event:'clerk/user.created'
+},
+async({event}) =>{
+    const { id,first_name,last_name, email_address, image_url } = event.data
     const userData = {
-      id,
-      name: `${first_name} ${last_name}`,
-      email_address: email_address[0].email_address,
-      image_url,
-    };
+        id:id,
+        name:first_name + ' ' + last_name,
+        email_address:email_address[0].email_address,
+        image_url:image_url
+    }
+    await connectDB()
+    await User.create(userData)
+}
 
-    await connectDB();
-    await User.create(userData);
-  }
-);
+ )
 
-// 🔁 User Updated
-export const syncUserUpdation = inngest.createFunction(
-  { id: "update-user-from-clerk" },
-  { event: "clerk/user.updated" },
-  async ({ event }) => {
-    const { id, first_name, last_name, email_address, image_url } = event.data;
-
+ export const syncUserUpdation = inngest.createFunction(
+   { 
+    id:'update-user-from-clerk'
+},
+{
+    event:'clerk/user.updated'
+},
+async({event}) =>{
+    const { id,first_name,last_name, email_address, image_url } = event.data
     const userData = {
-      id,
-      name: `${first_name} ${last_name}`,
-      email_address: email_address[0].email_address,
-      image_url,
-    };
+        id:id,
+        name:first_name + ' ' + last_name,
+        email_address:email_address[0].email_address,
+        image_url:image_url
+    }
+    await connectDB()
+    await User.findByIdandUpdate(id, userData)
+}
 
-    await connectDB();
-    await User.findByIdAndUpdate(id, userData);
-  }
-);
+ )
 
-// 🔁 User Deleted
-export const syncUserDeletion = inngest.createFunction(
-  { id: "delete-user-with-clerk" },
-  { event: "clerk/user.deleted" },
-  async ({ event }) => {
-    const { id } = event.data;
+  export const syncUserDeletion = inngest.createFunction(
+   { 
+    id:'delete-user-with-clerk'
+},
+{
+    event:'clerk/user.deleted'
+},
+async({event}) =>{
+    const {id} = event.data
+    await connectDB()
+    await User.findByIdandDelete(id)
+}
 
-    await connectDB();
-    await User.findByIdAndDelete(id);
-  }
-);
+ )
