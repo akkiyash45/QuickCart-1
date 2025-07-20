@@ -3,8 +3,8 @@ import connectDB from "./db";
 import User from "@/models/User";
 
 export const inngest = new Inngest({
-  id: "quickcart-next",
-  name: "QuickCart",
+  id: "blinkcart-next",
+  name: "BlinkCart",
 });
 
 export const syncUserCreation = inngest.createFunction(
